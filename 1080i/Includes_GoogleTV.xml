@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Google TV Home Screen Layout - Arctic Fuse Double Mod
+    GTV Home Screen Layout - Arctic Fuse Double Mod
     Activate via: Skin.SetString(Hub.Home.ReplaceWindow,1190)
 
     Screen layout (1920x1080):
       y=0-80    Top navigation bar (overlays hero)
       y=0-620   Hero spotlight area (fanart bg + info overlay)
-      y=620-930 "Top picks for you" row
-      y=930-1080 "Your apps" row
+      y=620-872 "Top picks for you" row   (h=200 panel, ends y=872)
+      y=872-1080 "Your apps" row           (h=158 panel, ends y=1080)
 -->
 <includes>
 
@@ -18,7 +18,7 @@
                  BACKGROUNDS
                  ────────────────────────────────────────────────── -->
 
-            <!-- Solid near-black fallback (shows when no fanart loads) -->
+            <!-- Solid near-black fallback -->
             <control type="image">
                 <left>0</left>
                 <top>0</top>
@@ -28,18 +28,18 @@
                 <colordiffuse>ff0d0d0d</colordiffuse>
             </control>
 
-            <!-- Hero fanart, full-width, dimmed slightly -->
+            <!-- Hero fanart — driven by widget container via Art(fanart) -->
             <control type="image">
                 <left>0</left>
                 <top>0</top>
                 <width>1920</width>
                 <height>640</height>
-                <texture>$INFO[Container(19010).ListItem.Fanart]</texture>
+                <texture background="true">$INFO[Container(19010).ListItem.Art(fanart)]</texture>
                 <aspectratio>scale</aspectratio>
                 <fadetime>800</fadetime>
             </control>
 
-            <!-- Top vignette - keeps nav bar readable over any fanart -->
+            <!-- Top vignette — keeps nav bar readable over any fanart -->
             <control type="image">
                 <left>0</left>
                 <top>0</top>
@@ -83,7 +83,7 @@
                 <colordiffuse>cc000000</colordiffuse>
             </control>
 
-            <!-- Solid dark background for content rows area -->
+            <!-- Solid dark background for content rows -->
             <control type="image">
                 <left>0</left>
                 <top>620</top>
@@ -95,9 +95,7 @@
 
             <!-- ──────────────────────────────────────────────────
                  HERO SPOTLIGHT PANEL (Container 19010)
-                 Loads TMDbHelper popular movies. Items are
-                 transparent; only drives bg image + info overlays.
-                 Left/right cycles featured title; auto-scrolls.
+                 Transparent items — drives bg fanart + info overlay.
                  ────────────────────────────────────────────────── -->
             <control type="panel" id="19010">
                 <left>0</left>
@@ -112,7 +110,6 @@
                 <ondown>19020</ondown>
                 <onfocus>SetProperty(TMDbHelper.WidgetContainer,19010,Home)</onfocus>
                 <itemlayout width="1920" height="540">
-                    <!-- Transparent hit-area keeps navigation working -->
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
@@ -137,8 +134,8 @@
 
             <!-- ──────────────────────────────────────────────────
                  HERO INFO OVERLAY
-                 Shows the focused hero item's metadata.
-                 Positioned at the lower-left of the hero area.
+                 Uses TMDbHelper window properties set by the
+                 widget container mechanism for reliable metadata.
                  ────────────────────────────────────────────────── -->
             <control type="group">
                 <left>60</left>
@@ -146,13 +143,13 @@
                 <width>1040</width>
                 <height>224</height>
 
-                <!-- Genre tag line (e.g. "Action · Adventure") -->
+                <!-- Genre tag -->
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
                     <width>700</width>
                     <height>36</height>
-                    <label>$INFO[Container(19010).ListItem.Genre]</label>
+                    <label>$INFO[Window(Home).Property(TMDbHelper.ListItem.Genre)]</label>
                     <font>font_mini_bold</font>
                     <textcolor>main_fg_70</textcolor>
                     <wrap>false</wrap>
@@ -164,33 +161,33 @@
                     <top>36</top>
                     <width>1040</width>
                     <height>84</height>
-                    <label>$INFO[Container(19010).ListItem.Label]</label>
+                    <label>$INFO[Window(Home).Property(TMDbHelper.ListItem.Title)]</label>
                     <font>font_huge_bold</font>
                     <textcolor>main_fg_100</textcolor>
                     <shadowcolor>shadow_full</shadowcolor>
                     <wrap>false</wrap>
                 </control>
 
-                <!-- "Trending | Plot description" subtitle -->
+                <!-- Plot description -->
                 <control type="label">
                     <left>0</left>
                     <top>126</top>
                     <width>1040</width>
                     <height>50</height>
-                    <label>$LOCALIZE[31128] [COLOR=main_fg_50]|[/COLOR] $INFO[Container(19010).ListItem.Plot]</label>
+                    <label>$INFO[Window(Home).Property(TMDbHelper.ListItem.Plot)]</label>
                     <font>font_mini</font>
                     <textcolor>main_fg_70</textcolor>
                     <scrolling>true</scrolling>
                     <wrap>false</wrap>
                 </control>
 
-                <!-- Year · Rating secondary line -->
+                <!-- Year · Rating -->
                 <control type="label">
                     <left>0</left>
                     <top>180</top>
                     <width>600</width>
                     <height>36</height>
-                    <label>$INFO[Container(19010).ListItem.Year] [COLOR=main_fg_30]·[/COLOR] $INFO[Container(19010).ListItem.Rating,$LOCALIZE[563] ][COLOR=main_fg_30]·[/COLOR] $INFO[Container(19010).ListItem.Duration,,h $INFO[Container(19010).ListItem.DurationAndSeconds, mins]]</label>
+                    <label>$INFO[Window(Home).Property(TMDbHelper.ListItem.Year)] [COLOR=main_fg_30]·[/COLOR] $INFO[Window(Home).Property(TMDbHelper.ListItem.Rating)]</label>
                     <font>font_tiny</font>
                     <textcolor>main_fg_50</textcolor>
                     <wrap>false</wrap>
@@ -198,14 +195,17 @@
             </control>
 
             <!-- ──────────────────────────────────────────────────
-                 "TOP PICKS FOR YOU" ROW
-                 Landscape thumbnails from the user's movie library.
+                 "TOP PICKS FOR YOU" ROW  (in-progress movies)
+                 Fanart background + clearlogo overlay per item.
+                 Falls back to title text if no clearlogo.
+                 Falls back to background colour if no fanart.
+                 Panel ends at y=872.
                  ────────────────────────────────────────────────── -->
             <control type="label">
                 <left>60</left>
                 <top>628</top>
                 <width>600</width>
-                <height>40</height>
+                <height>36</height>
                 <label>Top picks for you</label>
                 <font>font_main_bold</font>
                 <textcolor>main_fg_100</textcolor>
@@ -215,90 +215,147 @@
                 <left>40</left>
                 <top>672</top>
                 <width>1880</width>
-                <height>255</height>
+                <height>200</height>
                 <orient>horizontal</orient>
                 <scrolltime>300</scrolltime>
                 <preloaditems>4</preloaditems>
                 <onup>19010</onup>
                 <ondown>19030</ondown>
                 <onfocus>SetProperty(TMDbHelper.WidgetContainer,19020,Home)</onfocus>
-                <!-- Non-focused item: dimmed thumbnail + label -->
-                <itemlayout width="450" height="255">
+
+                <!-- Non-focused item -->
+                <itemlayout width="450" height="200">
+                    <!-- Dark tile background (shows when no fanart) -->
                     <control type="image">
                         <left>20</left>
                         <top>0</top>
                         <width>410</width>
-                        <height>230</height>
-                        <texture>$INFO[ListItem.Thumb]</texture>
+                        <height>194</height>
+                        <texture>special://skin/media/white.png</texture>
+                        <colordiffuse>ff1a1a1a</colordiffuse>
+                    </control>
+                    <!-- Fanart with diffuse rounded corners -->
+                    <control type="image">
+                        <left>20</left>
+                        <top>0</top>
+                        <width>410</width>
+                        <height>194</height>
+                        <texture background="true" diffuse="diffuse/landscape_w356_h200.png">$INFO[ListItem.Art(fanart)]</texture>
                         <aspectratio>scale</aspectratio>
                         <colordiffuse>b3ffffff</colordiffuse>
-                        <cornerradius>8</cornerradius>
                     </control>
-                    <control type="label">
+                    <!-- Bottom gradient for logo/title readability -->
+                    <control type="image">
                         <left>20</left>
-                        <top>234</top>
+                        <top>124</top>
                         <width>410</width>
-                        <height>20</height>
+                        <height>70</height>
+                        <texture>special://skin/media/white.png</texture>
+                        <colordiffuse>cc000000</colordiffuse>
+                    </control>
+                    <!-- ClearLogo overlay -->
+                    <control type="image">
+                        <left>30</left>
+                        <top>132</top>
+                        <width>390</width>
+                        <height>54</height>
+                        <texture background="true">$INFO[ListItem.Art(clearlogo)]</texture>
+                        <aspectratio scalediffuse="false" aligny="center">keep</aspectratio>
+                        <colordiffuse>ddffffff</colordiffuse>
+                        <visible>!String.IsEmpty(ListItem.Art(clearlogo))</visible>
+                    </control>
+                    <!-- Title fallback (no clearlogo) -->
+                    <control type="label">
+                        <left>30</left>
+                        <top>154</top>
+                        <width>390</width>
+                        <height>30</height>
                         <label>$INFO[ListItem.Label]</label>
-                        <font>font_tiny</font>
-                        <textcolor>main_fg_50</textcolor>
+                        <font>font_mini_bold</font>
+                        <textcolor>main_fg_90</textcolor>
                         <wrap>false</wrap>
+                        <visible>String.IsEmpty(ListItem.Art(clearlogo))</visible>
                     </control>
                 </itemlayout>
-                <!-- Focused item: full-bright, scale up, white border -->
-                <focusedlayout width="450" height="255">
+
+                <!-- Focused item: scale up, white border, full-bright -->
+                <focusedlayout width="450" height="200">
+                    <!-- Dark tile background -->
                     <control type="image">
                         <left>13</left>
                         <top>-7</top>
                         <width>424</width>
-                        <height>244</height>
-                        <texture>$INFO[ListItem.Thumb]</texture>
-                        <aspectratio>scale</aspectratio>
-                        <cornerradius>8</cornerradius>
+                        <height>208</height>
+                        <texture>special://skin/media/white.png</texture>
+                        <colordiffuse>ff1a1a1a</colordiffuse>
                     </control>
+                    <!-- Fanart with diffuse rounded corners, scaled up -->
+                    <control type="image">
+                        <left>13</left>
+                        <top>-7</top>
+                        <width>424</width>
+                        <height>208</height>
+                        <texture background="true" diffuse="diffuse/landscape_w356_h200.png">$INFO[ListItem.Art(fanart)]</texture>
+                        <aspectratio>scale</aspectratio>
+                    </control>
+                    <!-- White selection border -->
                     <control type="image">
                         <left>10</left>
                         <top>-10</top>
                         <width>430</width>
-                        <height>250</height>
+                        <height>214</height>
                         <texture>special://skin/media/white.png</texture>
                         <colordiffuse>00000000</colordiffuse>
                         <bordertexture>special://skin/media/white.png</bordertexture>
                         <bordersize>3</bordersize>
                         <colorborderdiffuse>ffffffff</colorborderdiffuse>
                     </control>
-                    <!-- Streaming service badge bottom-left -->
+                    <!-- Bottom gradient -->
                     <control type="image">
-                        <left>20</left>
-                        <top>170</top>
-                        <width>100</width>
-                        <height>50</height>
-                        <texture>$INFO[ListItem.Property(ChannelLogo)]</texture>
-                        <aspectratio>keep</aspectratio>
+                        <left>13</left>
+                        <top>134</top>
+                        <width>424</width>
+                        <height>67</height>
+                        <texture>special://skin/media/white.png</texture>
+                        <colordiffuse>cc000000</colordiffuse>
                     </control>
+                    <!-- ClearLogo overlay -->
+                    <control type="image">
+                        <left>23</left>
+                        <top>142</top>
+                        <width>404</width>
+                        <height>54</height>
+                        <texture background="true">$INFO[ListItem.Art(clearlogo)]</texture>
+                        <aspectratio scalediffuse="false" aligny="center">keep</aspectratio>
+                        <visible>!String.IsEmpty(ListItem.Art(clearlogo))</visible>
+                    </control>
+                    <!-- Title fallback (no clearlogo) -->
                     <control type="label">
-                        <left>20</left>
-                        <top>234</top>
-                        <width>410</width>
-                        <height>20</height>
+                        <left>23</left>
+                        <top>164</top>
+                        <width>404</width>
+                        <height>30</height>
                         <label>$INFO[ListItem.Label]</label>
-                        <font>font_tiny</font>
+                        <font>font_mini_bold</font>
                         <textcolor>main_fg_100</textcolor>
                         <wrap>false</wrap>
+                        <visible>String.IsEmpty(ListItem.Art(clearlogo))</visible>
                     </control>
                 </focusedlayout>
-                <content>videodb://movies/titles/?sort_method=dateadded&amp;sort_order=descending</content>
+
+                <content>videodb://movies/inprogress/</content>
             </control>
 
             <!-- ──────────────────────────────────────────────────
                  "YOUR APPS" ROW
-                 Video add-on sources shown as circular icons.
+                 Video add-on sources as rounded-corner icons.
+                 Container starts y=922, height=158 → ends y=1080.
                  ────────────────────────────────────────────────── -->
             <control type="label">
                 <left>60</left>
-                <top>938</top>
+                <top>882</top>
                 <width>400</width>
-                <height>40</height>
+                <height>36</height>
                 <label>Your apps</label>
                 <font>font_main_bold</font>
                 <textcolor>main_fg_100</textcolor>
@@ -306,30 +363,30 @@
 
             <control type="panel" id="19030">
                 <left>40</left>
-                <top>982</top>
+                <top>922</top>
                 <width>1880</width>
-                <height>136</height>
+                <height>158</height>
                 <orient>horizontal</orient>
                 <scrolltime>300</scrolltime>
                 <preloaditems>6</preloaditems>
                 <onup>19020</onup>
                 <ondown>19001</ondown>
-                <itemlayout width="160" height="136">
+
+                <itemlayout width="160" height="158">
                     <control type="image">
                         <left>20</left>
-                        <top>0</top>
+                        <top>4</top>
                         <width>120</width>
                         <height>120</height>
-                        <texture>$INFO[ListItem.Icon]</texture>
+                        <texture background="true" diffuse="diffuse/square_w294_h294.png">$INFO[ListItem.Icon]</texture>
                         <aspectratio>scale</aspectratio>
                         <colordiffuse>b3ffffff</colordiffuse>
-                        <cornerradius>20</cornerradius>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>122</top>
+                        <top>128</top>
                         <width>160</width>
-                        <height>18</height>
+                        <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font_tiny</font>
                         <textcolor>main_fg_50</textcolor>
@@ -337,21 +394,21 @@
                         <wrap>false</wrap>
                     </control>
                 </itemlayout>
-                <focusedlayout width="160" height="136">
+
+                <focusedlayout width="160" height="158">
                     <control type="image">
                         <left>13</left>
-                        <top>-6</top>
+                        <top>-4</top>
                         <width>134</width>
                         <height>134</height>
-                        <texture>$INFO[ListItem.Icon]</texture>
+                        <texture background="true" diffuse="diffuse/square_w294_h294.png">$INFO[ListItem.Icon]</texture>
                         <aspectratio>scale</aspectratio>
-                        <cornerradius>20</cornerradius>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>122</top>
+                        <top>128</top>
                         <width>160</width>
-                        <height>18</height>
+                        <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font_tiny</font>
                         <textcolor>main_fg_100</textcolor>
@@ -359,14 +416,13 @@
                         <wrap>false</wrap>
                     </control>
                 </focusedlayout>
+
                 <content>addons://sources/video/</content>
             </control>
 
             <!-- ──────────────────────────────────────────────────
                  TOP NAVIGATION BAR
                  Drawn last so it renders on top of all layers.
-                 Tabs navigate to hub windows; search/settings
-                 buttons on the right. "Google TV" brand label.
                  ────────────────────────────────────────────────── -->
             <control type="group">
                 <left>0</left>
@@ -374,7 +430,7 @@
                 <width>1920</width>
                 <height>80</height>
 
-                <!-- Semi-transparent dark tint behind nav bar -->
+                <!-- Semi-transparent tint behind nav bar -->
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -399,9 +455,7 @@
                     <ondown>19010</ondown>
                 </control>
 
-                <!-- ── Navigation tabs ── -->
-
-                <!-- "For You" tab (active on this window; white underline) -->
+                <!-- "For You" tab (active; white underline) -->
                 <control type="button" id="19001">
                     <left>104</left>
                     <top>14</top>
@@ -420,7 +474,6 @@
                     <onright>19002</onright>
                     <ondown>19010</ondown>
                 </control>
-                <!-- Active-tab underline for "For You" -->
                 <control type="image">
                     <left>124</left>
                     <top>71</top>
@@ -505,8 +558,6 @@
                     <onright>19006</onright>
                     <ondown>19010</ondown>
                 </control>
-
-                <!-- ── Right-side icons ── -->
 
                 <!-- Search -->
                 <control type="button" id="19006">
