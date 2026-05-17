@@ -232,6 +232,7 @@
                         <texture>$INFO[ListItem.Thumb]</texture>
                         <aspectratio>scale</aspectratio>
                         <colordiffuse>b3ffffff</colordiffuse>
+                        <cornerradius>8</cornerradius>
                     </control>
                     <control type="label">
                         <left>20</left>
@@ -253,6 +254,7 @@
                         <height>244</height>
                         <texture>$INFO[ListItem.Thumb]</texture>
                         <aspectratio>scale</aspectratio>
+                        <cornerradius>8</cornerradius>
                     </control>
                     <control type="image">
                         <left>10</left>
@@ -321,6 +323,7 @@
                         <texture>$INFO[ListItem.Icon]</texture>
                         <aspectratio>scale</aspectratio>
                         <colordiffuse>b3ffffff</colordiffuse>
+                        <cornerradius>20</cornerradius>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -342,6 +345,7 @@
                         <height>134</height>
                         <texture>$INFO[ListItem.Icon]</texture>
                         <aspectratio>scale</aspectratio>
+                        <cornerradius>20</cornerradius>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -534,18 +538,6 @@
                     <onleft>19006</onleft>
                     <onright>19005</onright>
                     <ondown>19010</ondown>
-                </control>
-
-                <!-- Skin name label (right side) -->
-                <control type="label">
-                    <left>1712</left>
-                    <top>26</top>
-                    <width>176</width>
-                    <height>32</height>
-                    <label>Google TV</label>
-                    <font>font_main_bold</font>
-                    <textcolor>main_fg_70</textcolor>
-                    <align>right</align>
                 </control>
 
             </control>

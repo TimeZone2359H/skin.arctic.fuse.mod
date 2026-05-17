@@ -69,8 +69,9 @@
         <param name="property_window_id">Home</param>
     </include>
 
-    <!-- Google TV Home: point TMDbHelper at the hero container -->
+    <!-- Google TV Home: point TMDbHelper at the hero container and set initial focus -->
     <onload condition="Integer.IsEqual(Skin.String(Hub.Home.ReplaceWindow),1190)">SetProperty(TMDbHelper.WidgetContainer,19010,Home)</onload>
+    <onload condition="Integer.IsEqual(Skin.String(Hub.Home.ReplaceWindow),1190)">SetFocus(19001)</onload>
 
     <onload condition="!Skin.HasSetting(Wizard.FirstRun)">AlarmClock(openwizard,ActivateWindow(1180),00:01,silent)</onload>
     <onload condition="!Skin.HasSetting(Home.FirstRun)">Skin.SetBool(Hub.Home.DisableSubmenu)</onload>
